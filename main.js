@@ -154,7 +154,7 @@ function menu() {
       case '1':
         rl.question('Enter name: ', name => {
           rl.question('Enter value: ', value => {
-            db.addRecord({ name, value });
+            await db.addRecord({ name, value });
             createBackup();
             console.log(' Record added successfully as well as in backup!');
             menu();
@@ -163,7 +163,7 @@ function menu() {
         break;
 
       case '2':
-        const records = db.listRecords();
+        const records = await db.listRecords();
         if (records.length === 0) console.log('No records found.');
         else records.forEach(r => console.log(`ID: ${r.id} | Name: ${r.name} | Value: ${r.value}`));
         menu();
@@ -173,7 +173,7 @@ function menu() {
         rl.question('Enter record ID to update: ', id => {
           rl.question('New name: ', name => {
             rl.question('New value: ', value => {
-              const updated = db.updateRecord(Number(id), name, value);
+              const updated = await db.updateRecord(Number(id), name, value);
               console.log(updated ? ' Record updated!' : ' Record not found.');
               menu();
             });
@@ -183,7 +183,7 @@ function menu() {
 
       case '4':
         rl.question('Enter record ID to delete: ', id => {
-          const deleted = db.deleteRecord(Number(id));
+          const deleted = await db.deleteRecord(Number(id));
           if (deleted) createBackup();
           console.log(deleted ? ' Record deleted! and backup created successfully' : ' Record not found.');
           menu();
