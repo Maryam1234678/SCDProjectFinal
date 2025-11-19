@@ -6,6 +6,19 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+
+function createBackup() {
+  const fs = require('fs');
+  if (!fs.existsSync('backups')) fs.mkdirSync('backups');
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `backups/backup_${timestamp}.json`;
+
+  fs.writeFileSync(filename, JSON.stringify(db.listRecords(), null, 2));
+
+  console.log(` Backup created: ${filename}`);
+}
+
 function exportData() {
   const records = db.listRecords();
   const now = new Date();
@@ -111,7 +124,8 @@ function menu() {
         rl.question('Enter name: ', name => {
           rl.question('Enter value: ', value => {
             db.addRecord({ name, value });
-            console.log(' Record added successfully!');
+            createBackup();
+            console.log(' Record added successfully as well as in backup!');
             menu();
           });
         });
@@ -139,7 +153,8 @@ function menu() {
       case '4':
         rl.question('Enter record ID to delete: ', id => {
           const deleted = db.deleteRecord(Number(id));
-          console.log(deleted ? ' Record deleted!' : ' Record not found.');
+          if (deleted) createBackup();
+          console.log(deleted ? ' Record deleted! and backup created successfully' : ' Record not found.');
           menu();
         });
         break;
