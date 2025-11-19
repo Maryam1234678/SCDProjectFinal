@@ -7,6 +7,36 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+function viewVaultStats() {
+  const records = db.listRecords();
+
+  if (records.length === 0) {
+    console.log(' No records in vault.');
+    return menu();
+  }
+
+  const total = records.length;
+  const latest = new Date(Math.max(...records.map(r => r.id)));
+  const earliest = new Date(Math.min(...records.map(r => r.id)));
+
+  const longest = records.reduce((a, b) =>
+    b.name.length > a.name.length ? b : a
+  );
+
+  const stats =
+`Vault Statistics:
+--------------------------
+Total Records: ${total}
+Last Modified: ${latest.toISOString()}
+Longest Name: ${longest.name} (${longest.name.length} characters)
+Earliest Record: ${earliest.toISOString().split('T')[0]}
+Latest Record: ${latest.toISOString().split('T')[0]}
+`;
+
+  console.log(stats);
+  menu();
+}
+
 function createBackup() {
   const fs = require('fs');
   if (!fs.existsSync('backups')) fs.mkdirSync('backups');
@@ -114,7 +144,8 @@ function menu() {
 5. Search Records
 6. Sort Records
 7. Export Data
-8. Exit
+8. View Vault Statistics
+9. Exit
 =====================
   `);
 
@@ -169,6 +200,9 @@ function menu() {
         exportData();
         break;
       case '8':
+      viewVaultStats();
+      break;
+      case '9':
         console.log(' Exiting NodeVault...');
         rl.close();
         break;
