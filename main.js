@@ -1,11 +1,29 @@
 const readline = require('readline');
 const db = require('./db');
 require('./events/logger'); // Initialize event logger
-
+const fs = require('fs');//for file conversion
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+function exportData() {
+  const records = db.listRecords();
+  const now = new Date();
+  const header =
+`Export Date: ${now.toISOString()}
+Total Records: ${records.length}
+File: export.txt
+-------------------------------------\n`;
+
+  const body = records.map(r =>
+    `ID: ${r.id} | Name: ${r.name} | Value: ${r.value}`
+  ).join('\n');
+
+  fs.writeFileSync('export.txt', header + body);
+
+  console.log(' Data exported successfully to export.txt.');
+  menu();
+}
 
 function sortRecords() {
   rl.question('Sort by either (name/date): ', field => {
@@ -82,7 +100,8 @@ function menu() {
 4. Delete Record
 5. Search Records
 6. Sort Records
-7. Exit
+7. Export Data
+8. Exit
 =====================
   `);
 
@@ -132,10 +151,12 @@ function menu() {
         sortRecords();
         break;
       case '7':
+        exportData();
+        break;
+      case '8':
         console.log(' Exiting NodeVault...');
         rl.close();
         break;
-
       default:
         console.log('Invalid option.');
         menu();
