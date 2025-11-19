@@ -6,6 +6,32 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+function searchRecords() {
+  rl.question('Enter search keyword: ', keyword => {
+    if (!keyword.trim()) {
+      console.log(' Please enter a valid search term.');
+      menu();
+      return;
+    }
+    
+    const records = db.listRecords();
+    const matches = records.filter(r => 
+      r.name.toLowerCase().includes(keyword.toLowerCase()) ||
+      r.id.toString().includes(keyword)
+    );
+    
+    if (matches.length === 0) {
+      console.log(' No records found.');
+    } else {
+      console.log(`\n Found ${matches.length} matching record(s):`);
+      matches.forEach((r, idx) => {
+        const created = new Date(r.id).toISOString().split('T')[0];
+        console.log(`${idx + 1}. ID: ${r.id} | Name: ${r.name} | Created: ${created}`);
+      });
+    }
+    menu();
+  });
+}
 
 function menu() {
   console.log(`
@@ -14,7 +40,8 @@ function menu() {
 2. List Records
 3. Update Record
 4. Delete Record
-5. Exit
+5. Search Records
+6. Exit
 =====================
   `);
 
@@ -24,7 +51,7 @@ function menu() {
         rl.question('Enter name: ', name => {
           rl.question('Enter value: ', value => {
             db.addRecord({ name, value });
-            console.log('✅ Record added successfully!');
+            console.log(' Record added successfully!');
             menu();
           });
         });
@@ -42,7 +69,7 @@ function menu() {
           rl.question('New name: ', name => {
             rl.question('New value: ', value => {
               const updated = db.updateRecord(Number(id), name, value);
-              console.log(updated ? '✅ Record updated!' : '❌ Record not found.');
+              console.log(updated ? ' Record updated!' : ' Record not found.');
               menu();
             });
           });
@@ -52,13 +79,16 @@ function menu() {
       case '4':
         rl.question('Enter record ID to delete: ', id => {
           const deleted = db.deleteRecord(Number(id));
-          console.log(deleted ? '🗑️ Record deleted!' : '❌ Record not found.');
+          console.log(deleted ? ' Record deleted!' : ' Record not found.');
           menu();
         });
         break;
 
       case '5':
-        console.log('👋 Exiting NodeVault...');
+        searchRecords();
+        break;
+      case '6':
+        console.log(' Exiting NodeVault...');
         rl.close();
         break;
 
