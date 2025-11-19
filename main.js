@@ -6,6 +6,46 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+
+function sortRecords() {
+  rl.question('Sort by either (name/date): ', field => {
+    field = field.toLowerCase();
+    if (field !== 'name' && field !== 'date') {
+      console.log('Invalid field.');
+      return menu();
+    }
+
+    rl.question('Enter Order (asc/desc): ', order => {
+      order = order.toLowerCase();
+      if (order !== 'asc' && order !== 'desc') {
+        console.log('Invalid order.');
+        return menu();
+      }
+
+      let records = [...db.listRecords()];
+
+      records.sort((a, b) => {
+        if (field === 'name') {
+          const n1 = a.name.toLowerCase();
+          const n2 = b.name.toLowerCase();
+          return order === 'asc' ? n1.localeCompare(n2) : n2.localeCompare(n1);
+        } else {
+          const d1 = a.id;
+          const d2 = b.id;
+          return order === 'asc' ? d1 - d2 : d2 - d1;
+        }
+      });
+
+      console.log('\n Sorted Records:');
+      records.forEach(r => {
+        console.log(`ID: ${r.id} | Name: ${r.name} | Value: ${r.value}`);
+      });
+
+      menu();
+    });
+  });
+}
+
 function searchRecords() {
   rl.question('Enter search keyword: ', keyword => {
     if (!keyword.trim()) {
@@ -41,7 +81,8 @@ function menu() {
 3. Update Record
 4. Delete Record
 5. Search Records
-6. Exit
+6. Sort Records
+7. Exit
 =====================
   `);
 
@@ -88,6 +129,9 @@ function menu() {
         searchRecords();
         break;
       case '6':
+        sortRecords();
+        break;
+      case '7':
         console.log(' Exiting NodeVault...');
         rl.close();
         break;
