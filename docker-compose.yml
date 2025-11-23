@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    networks:
+      - nodevault-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # NodeVault Backend Service (Built from Dockerfile)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodevault-backend:latest
+    container_name: nodevault-backend
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      NODE_ENV: ${NODE_ENV}
+      APP_NAME: ${APP_NAME}
+    networks:
+      - nodevault-network
+    stdin_open: true
+    tty: true
+
+# Define custom bridge network
+networks:
+  nodevault-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.0.0/16
+          gateway: 172.26.0.1
+
+# Define persistent volumes
+volumes:
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local

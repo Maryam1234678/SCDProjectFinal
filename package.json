@@ -1,16 +1,17 @@
 {
-  "dependencies": {
-    "dotenv": "^17.2.3",
-    "mongodb": "^7.0.0"
-  },
   "name": "scdproject25",
   "version": "1.0.0",
+  "description": "NodeJS CRUD Application with MongoDB",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "mongodb": "^7.0.0"
+  }
 }

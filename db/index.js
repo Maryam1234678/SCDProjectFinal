@@ -9,7 +9,7 @@ let db;
 let collection;
 
 // Connect to MongoDB (only once)
-async function connectDB() {
+/*async function connectDB() {
   if (!db) {
     const client = new MongoClient(uri);
     await client.connect();
@@ -17,8 +17,38 @@ async function connectDB() {
     collection = db.collection("records");
     console.log(' Connected to MongoDB');
   }
+}*/
+async function connectDB() {
+  if (!db) {
+    let retries = 3;
+    let lastError;
+    
+    while (retries > 0) {
+      try {
+        const client = new MongoClient(uri, {
+          connectTimeoutMS: 10000,
+          serverSelectionTimeoutMS: 10000,
+        });
+        
+        await client.connect();
+        db = client.db("NodeVaultDB");
+        collection = db.collection("records");
+        console.log(' Connected to MongoDB');
+        return;
+      } catch (error) {
+        lastError = error;
+        retries--;
+        console.log(` Connection attempt failed. Retries left: ${retries}`);
+        
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        }
+      }
+    }
+    
+    throw new Error(`Failed to connect to MongoDB after multiple attempts: ${lastError.message}`);
+  }
 }
-
 // Add Record
 async function addRecord({ name, value }) {
   await connectDB();
