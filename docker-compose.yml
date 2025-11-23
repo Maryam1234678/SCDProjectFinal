@@ -22,9 +22,12 @@ services:
       retries: 5
       start_period: 10s
 
-  # NodeVault Backend Service
+  # NodeVault Backend Service (Built from Dockerfile)
   backend:
-    image: nodevault-backend:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodevault-backend:latest
     container_name: nodevault-backend
     restart: unless-stopped
     depends_on:

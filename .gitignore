@@ -5,3 +5,13 @@ export.txt
 .env.docker
 .env.docker.local
 .env.local
+data/vault.json
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
